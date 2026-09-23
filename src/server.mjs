@@ -99,7 +99,9 @@ async function handleWebhook(request, response) {
       rawBody,
       request.headers['x-webflow-timestamp'],
       request.headers['x-webflow-signature'],
-      process.env.WEBFLOW_WEBHOOK_SECRET?.trim() || process.env.WEBFLOW_CLIENT_SECRET?.trim(),
+      // OAuth-created Webflow webhooks are signed with the app client secret.
+      // Fall back to WEBFLOW_WEBHOOK_SECRET for site-token webhooks.
+      process.env.WEBFLOW_CLIENT_SECRET?.trim() || process.env.WEBFLOW_WEBHOOK_SECRET?.trim(),
     )
   ) {
     return sendJson(response, 401, { error: 'Invalid Webflow webhook signature' });
