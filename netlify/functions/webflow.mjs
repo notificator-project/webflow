@@ -171,15 +171,12 @@ export default async (request) => {
       await saveDatabaseInstallation(stateRecord.installationId, {
         webflow_access_token: encryptSecret(tokens.access_token),
       });
-      return new Response(
-        '<h1>Webflow connected</h1><p>Return to the setup screen to connect your Notificator account.</p>',
-        {
-          headers: {
-            'content-type': 'text/html; charset=utf-8',
-            'set-cookie': `notificator_webflow_setup=${encodeURIComponent(stateRecord.installationId)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600`,
-          },
-        },
+      const response = redirect('/?connected=webflow');
+      response.headers.append(
+        'set-cookie',
+        `notificator_webflow_setup=${encodeURIComponent(stateRecord.installationId)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600`,
       );
+      return response;
     }
 
     if (route === 'connect') {
