@@ -53,12 +53,23 @@
     <script>
       const status = document.querySelector('#status');
       const siteSelect = document.querySelector('#site');
+      const connectButton = document.querySelector('#connect-webflow');
       const setStatus = (message, error = false) => { status.textContent = message; status.className = error ? 'status error' : 'status'; };
+      const setConnected = () => {
+        connectButton.textContent = 'Webflow connected';
+        connectButton.disabled = true;
+      };
       // Use the function URL directly: some Netlify custom-domain rewrites can
       // drop the route query parameter from the friendly OAuth path.
-      document.querySelector('#connect-webflow').addEventListener('click', () => {
+      connectButton.addEventListener('click', () => {
         window.location.href = '/.netlify/functions/webflow?route=auth';
       });
+
+      if (new URLSearchParams(window.location.search).get('connected') === 'webflow') {
+        setConnected();
+        setStatus('Webflow connected. Add your Notificator API key.');
+        window.history.replaceState({}, '', '/');
+      }
 
       async function loadSites() {
         const response = await fetch('/api/webflow/sites');
@@ -66,7 +77,10 @@
         const result = await response.json();
         const sites = Array.isArray(result) ? result : result.sites || [];
         siteSelect.innerHTML = sites.map((site) => `<option value="${site.id}">${site.displayName || site.name || site.id}</option>`).join('');
-        if (sites.length) setStatus('Webflow connected. Add your Notificator API key.');
+        if (sites.length) {
+          setConnected();
+          setStatus('Webflow connected. Add your Notificator API key.');
+        }
       }
       loadSites().catch(() => {});
 
