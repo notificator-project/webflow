@@ -1,0 +1,39 @@
+[build]
+  functions = "netlify/functions"
+  publish = "public"
+
+[[redirects]]
+  from = "/auth/webflow"
+  to = "/.netlify/functions/webflow?route=auth"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/auth/webflow/callback"
+  to = "/.netlify/functions/webflow?route=callback"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/webflow/sites"
+  to = "/.netlify/functions/webflow?route=sites"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/webflow/connect"
+  to = "/.netlify/functions/webflow?route=connect"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/webflow/webhooks"
+  to = "/.netlify/functions/webflow?route=register-webhook"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/webhooks/webflow"
+  to = "/.netlify/functions/webflow?route=webhook"
+  status = 200
+  force = true

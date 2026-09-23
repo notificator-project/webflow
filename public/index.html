@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Notificator for Webflow</title>
+    <style>
+      :root { color-scheme: light; font: 16px/1.5 system-ui, sans-serif; color: #14213d; background: #f4f7fc; }
+      main { max-width: 680px; margin: 4rem auto; padding: 2rem; background: white; border: 1px solid #dbe3f0; border-radius: 18px; box-shadow: 0 16px 40px #14213d12; }
+      h1 { margin-top: 0; }
+      section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e7ecf4; }
+      label { display: grid; gap: .4rem; margin: 1rem 0; font-weight: 600; }
+      input, select, button { box-sizing: border-box; width: 100%; padding: .7rem .8rem; border-radius: 9px; border: 1px solid #c8d4e5; font: inherit; }
+      button { cursor: pointer; background: #315de5; color: white; border-color: #315de5; font-weight: 700; }
+      button:disabled { cursor: wait; opacity: .6; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+      .status { min-height: 1.5rem; color: #52627d; }
+      .error { color: #b42318; }
+      @media (max-width: 600px) { main { margin: 1rem; padding: 1.25rem; } .row { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Notificator for Webflow</h1>
+      <p>Connect a Webflow site and send form submissions to your Notificator account.</p>
+      <p id="status" class="status">Connect Webflow to begin.</p>
+      <button id="connect-webflow" type="button">Connect Webflow</button>
+
+      <section>
+        <h2>Notificator account</h2>
+        <p>Your API key is sent over HTTPS and stored encrypted on the server.</p>
+        <form id="api-key-form">
+          <label>Notificator API key <input name="apiKey" type="password" autocomplete="off" required /></label>
+          <button type="submit">Connect account</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>First scenario</h2>
+        <form id="scenario-form">
+          <label>Webflow site <select id="site" name="siteId" required><option value="">Connect Webflow first</option></select></label>
+          <label>Scenario name <input name="name" value="Webflow form submissions" required /></label>
+          <div class="row">
+            <label>Form name (optional) <input name="formName" placeholder="Contact Form" /></label>
+            <label>Severity <select name="severity"><option value="info">Information</option><option value="warning">Warning</option><option value="critical">Critical</option></select></label>
+          </div>
+          <label>Notification title <input name="titleTemplate" value="New Webflow form submission" required /></label>
+          <label>Notification body <input name="bodyTemplate" value="A new form was submitted on your Webflow site." required /></label>
+          <button type="submit">Create scenario</button>
+        </form>
+      </section>
+    </main>
+    <script>
+      const status = document.querySelector('#status');
+      const siteSelect = document.querySelector('#site');
+      const setStatus = (message, error = false) => { status.textContent = message; status.className = error ? 'status error' : 'status'; };
+      document.querySelector('#connect-webflow').addEventListener('click', () => { window.location.href = '/auth/webflow'; });
+
+      async function loadSites() {
+        const response = await fetch('/api/webflow/sites');
+        if (!response.ok) return;
+        const result = await response.json();
+        const sites = Array.isArray(result) ? result : result.sites || [];
+        siteSelect.innerHTML = sites.map((site) => `<option value="${site.id}">${site.displayName || site.name || site.id}</option>`).join('');
+        if (sites.length) setStatus('Webflow connected. Add your Notificator API key.');
+      }
+      loadSites().catch(() => {});
+
+      document.querySelector('#api-key-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const apiKey = new FormData(event.currentTarget).get('apiKey');
+        const response = await fetch('/api/webflow/connect', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ apiKey }) });
+        const result = await response.json();
+        setStatus(response.ok ? 'Notificator account connected.' : result.error || 'Unable to connect account.', !response.ok);
+      });
+
+      document.querySelector('#scenario-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const values = Object.fromEntries(new FormData(event.currentTarget));
+        const payload = { ...values, triggerType: 'form_submission', filter: values.formName ? { name: values.formName } : undefined };
+        const response = await fetch('/api/webflow/webhooks', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+        const result = await response.json();
+        setStatus(response.ok ? 'Scenario created. Submit the form to test it.' : result.error || 'Unable to create scenario.', !response.ok);
+      });
+    </script>
+  </body>
+</html>
