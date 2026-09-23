@@ -36,7 +36,7 @@ The Webflow app must be configured with the exact callback URL from `WEBFLOW_RED
 ## Netlify test flow
 
 1. Run the Supabase migration in `supabase/migrations/202609230001_webflow_integrations.sql`.
-2. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and a random 32-byte hex `WEBFLOW_ENCRYPTION_KEY` in Netlify.
+2. Set `SUPABASE_URL`, the server-only `SUPABASE_SECRET_KEY` (`sb_secret_...`), and a random 32-byte hex `WEBFLOW_ENCRYPTION_KEY` in Netlify. Never expose the secret key to browser code.
 3. Open the deployed site and connect Webflow.
 4. Enter a valid Notificator API key.
 5. Select a Webflow site and create the form-submission scenario.
