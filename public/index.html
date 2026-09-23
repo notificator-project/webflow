@@ -72,7 +72,7 @@
       }
 
       async function loadSites() {
-        const response = await fetch('/api/webflow/sites');
+        const response = await fetch('/.netlify/functions/webflow?route=sites');
         if (!response.ok) return;
         const result = await response.json();
         const sites = Array.isArray(result) ? result : result.sites || [];
@@ -87,7 +87,7 @@
       document.querySelector('#api-key-form').addEventListener('submit', async (event) => {
         event.preventDefault();
         const apiKey = new FormData(event.currentTarget).get('apiKey');
-        const response = await fetch('/api/webflow/connect', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ apiKey }) });
+        const response = await fetch('/.netlify/functions/webflow?route=connect', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ apiKey }) });
         const result = await response.json();
         setStatus(response.ok ? 'Notificator account connected.' : result.error || 'Unable to connect account.', !response.ok);
       });
@@ -96,7 +96,7 @@
         event.preventDefault();
         const values = Object.fromEntries(new FormData(event.currentTarget));
         const payload = { ...values, triggerType: 'form_submission', filter: values.formName ? { name: values.formName } : undefined };
-        const response = await fetch('/api/webflow/webhooks', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+        const response = await fetch('/.netlify/functions/webflow?route=register-webhook', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
         const result = await response.json();
         setStatus(response.ok ? 'Scenario created. Submit the form to test it.' : result.error || 'Unable to create scenario.', !response.ok);
       });

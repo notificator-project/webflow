@@ -31,16 +31,17 @@ npm run dev
 
 Then open `http://localhost:8787/` to begin OAuth and inspect the connected sites.
 
-The Webflow app must be configured with the exact callback URL from `WEBFLOW_REDIRECT_URI` and a webhook destination of `https://YOUR_HOST/webhooks/webflow`. OAuth webhooks use the app client secret for signature verification; site-token webhooks should set their per-webhook secret in `WEBFLOW_WEBHOOK_SECRET`.
+The Webflow app must be configured with the exact callback URL from `WEBFLOW_REDIRECT_URI` and a webhook destination of `https://YOUR_HOST/.netlify/functions/webflow?route=webhook`. OAuth webhooks use the app client secret for signature verification; site-token webhooks should set their per-webhook secret in `WEBFLOW_WEBHOOK_SECRET`.
 
 ## Netlify test flow
 
 1. Run the Supabase migration in `supabase/migrations/202609230001_webflow_integrations.sql`.
 2. Set `SUPABASE_URL`, the server-only `SUPABASE_SECRET_KEY` (`sb_secret_...`), and a random 32-byte hex `WEBFLOW_ENCRYPTION_KEY` in Netlify. Never expose the secret key to browser code.
-3. Open the deployed site and connect Webflow.
-4. Enter a valid Notificator API key.
-5. Select a Webflow site and create the form-submission scenario.
-6. Submit the selected form and verify the notification delivery.
+3. Set `WEBFLOW_WEBHOOK_URL` to `https://your-domain/.netlify/functions/webflow?route=webhook` and use the same direct function URL for the Webflow webhook destination.
+4. Open the deployed site and connect Webflow.
+5. Enter a valid Notificator API key.
+6. Select a Webflow site and create the form-submission scenario.
+7. Submit the selected form and verify the notification delivery.
 
 The API key and Webflow access token are never returned to the browser after saving. The current schema supports one installation per setup cookie; account ownership and multiple installations should be added through the dashboard/Supabase account model before public release.
 
