@@ -54,7 +54,11 @@
       const status = document.querySelector('#status');
       const siteSelect = document.querySelector('#site');
       const setStatus = (message, error = false) => { status.textContent = message; status.className = error ? 'status error' : 'status'; };
-      document.querySelector('#connect-webflow').addEventListener('click', () => { window.location.href = '/auth/webflow'; });
+      // Use the function URL directly: some Netlify custom-domain rewrites can
+      // drop the route query parameter from the friendly OAuth path.
+      document.querySelector('#connect-webflow').addEventListener('click', () => {
+        window.location.href = '/.netlify/functions/webflow?route=auth';
+      });
 
       async function loadSites() {
         const response = await fetch('/api/webflow/sites');
